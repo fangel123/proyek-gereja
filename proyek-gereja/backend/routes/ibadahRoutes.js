@@ -11,7 +11,12 @@ router
   .post(ibadahController.createIbadah);
 
 router.route("/:id").get(ibadahController.getIbadahById);
-
 router.route("/:id/kehadiran").put(ibadahController.updateKehadiran);
+
+router.route("/:id/agenda").post(ibadahController.addAgenda);
+router
+  .route("/:id/agenda/:agenda_id")
+  .delete(ibadahController.deleteAgenda)
+  .put(ibadahController.updateAgenda); // <-- TAMBAHKAN INI
 
 module.exports = router;

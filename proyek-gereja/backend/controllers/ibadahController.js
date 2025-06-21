@@ -93,3 +93,47 @@ exports.updateKehadiran = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+exports.addAgenda = async (req, res) => {
+  const { id } = req.params; // id ibadah
+  const { urutan, nama_agenda, penanggung_jawab } = req.body;
+
+  try {
+    const newAgenda = await pool.query(
+      `INSERT INTO agenda (ibadah_id, urutan, nama_agenda, penanggung_jawab)
+             VALUES ($1, $2, $3, $4) RETURNING *`,
+      [id, urutan, nama_agenda, penanggung_jawab]
+    );
+    res.status(201).json(newAgenda.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+exports.deleteAgenda = async (req, res) => {
+  try {
+    const { agenda_id } = req.params;
+    await pool.query("DELETE FROM agenda WHERE id = $1", [agenda_id]);
+    res.json({ message: "Agenda berhasil dihapus." });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+exports.updateAgenda = async (req, res) => {
+  const { agenda_id } = req.params;
+  const { urutan, nama_agenda, penanggung_jawab } = req.body;
+  try {
+    await pool.query(
+      `UPDATE agenda SET urutan = $1, nama_agenda = $2, penanggung_jawab = $3
+             WHERE id = $4`,
+      [urutan, nama_agenda, penanggung_jawab, agenda_id]
+    );
+    res.json({ message: "Agenda berhasil diperbarui." });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
