@@ -10,4 +10,8 @@ router
   .get(ibadahController.getAllIbadah)
   .post(ibadahController.createIbadah);
 
+router.route("/:id").get(ibadahController.getIbadahById);
+
+router.route("/:id/kehadiran").put(ibadahController.updateKehadiran);
+
 module.exports = router;

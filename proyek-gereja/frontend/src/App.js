@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import KlasifikasiPage from "./pages/KlasifikasiPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import IbadahListPage from "./pages/IbadahListPage";
+import IbadahDetailPage from "./pages/IbadahDetailPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             />
             <Route path="/klasifikasi" element={<KlasifikasiPage />} />
             <Route path="/ibadah" element={<IbadahListPage />} />
+            <Route path="/ibadah/:id" element={<IbadahDetailPage />} />
           </Route>
         </Routes>
       </div>

@@ -85,7 +85,10 @@ const IbadahListPage = () => {
           <li key={ibadah.id}>
             {ibadah.nama} -{" "}
             {new Date(ibadah.tanggal).toLocaleDateString("id-ID")} (
-            {ibadah.waktu})
+            {ibadah.waktu}){" - "}
+            <Link to={`/ibadah/${ibadah.id}`}>
+              Catat Kehadiran / Lihat Detail
+            </Link>
           </li>
         ))}
       </ul>
