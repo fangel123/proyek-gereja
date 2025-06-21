@@ -17,6 +17,6 @@ router.route("/:id/agenda").post(ibadahController.addAgenda);
 router
   .route("/:id/agenda/:agenda_id")
   .delete(ibadahController.deleteAgenda)
-  .put(ibadahController.updateAgenda); // <-- TAMBAHKAN INI
+  .put(ibadahController.updateAgenda);
 
 module.exports = router;
