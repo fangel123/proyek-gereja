@@ -4,6 +4,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import KlasifikasiPage from "./pages/KlasifikasiPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import IbadahListPage from "./pages/IbadahListPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               }
             />
             <Route path="/klasifikasi" element={<KlasifikasiPage />} />
+            <Route path="/ibadah" element={<IbadahListPage />} />
           </Route>
         </Routes>
       </div>

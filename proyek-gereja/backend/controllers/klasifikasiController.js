@@ -32,4 +32,29 @@ exports.createKlasifikasi = async (req, res) => {
   }
 };
 
-// ... (Nanti kita tambahkan Update dan Delete)
+exports.updateKlasifikasi = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nama } = req.body;
+
+    await pool.query("UPDATE klasifikasi SET nama = $1 WHERE id = $2", [
+      nama,
+      id,
+    ]);
+    res.json({ message: "Klasifikasi berhasil diperbarui" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+exports.deleteKlasifikasi = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query("DELETE FROM klasifikasi WHERE id = $1", [id]);
+    res.json({ message: "Klasifikasi berhasil dihapus" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
