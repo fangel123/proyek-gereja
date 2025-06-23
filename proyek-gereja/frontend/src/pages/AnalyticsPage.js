@@ -77,20 +77,52 @@ const AnalyticsPage = () => {
       });
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="text-center p-10">Loading...</div>;
 
   return (
-    <div>
-      <Link to="/dashboard" style={{ marginBottom: "20px", display: "block" }}>
-        Kembali ke Dashboard
-      </Link>
-      <h2>Analitik Kehadiran Jemaat</h2>
-      <button onClick={handleExportExcel}>Export Semua Data ke Excel</button>
-      {chartData.labels ? (
-        <Line data={chartData} />
-      ) : (
-        <p>Tidak ada data untuk ditampilkan.</p>
-      )}
+    <div className="space-y-6">
+      <div>
+        <Link
+          to="/dashboard"
+          className="text-sm font-medium text-blue-600 hover:text-blue-500"
+        >
+          ← Kembali ke Dashboard
+        </Link>
+        <h1 className="text-3xl font-bold text-gray-900 mt-1">
+          Analitik Kehadiran Jemaat
+        </h1>
+      </div>
+
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+          <h3 className="text-lg font-medium text-gray-900">
+            Grafik Tren Kehadiran
+          </h3>
+          <button
+            onClick={handleExportExcel}
+            className="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 shadow-sm"
+          >
+            Export Semua Data ke Excel
+          </button>
+        </div>
+
+        {chartData.labels && chartData.labels.length > 0 ? (
+          <div className="h-96 w-full">
+            {" "}
+            <Line
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+              }}
+            />
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 py-10">
+            Tidak ada data kehadiran untuk ditampilkan dalam grafik.
+          </p>
+        )}
+      </div>
     </div>
   );
 };

@@ -11,13 +11,21 @@ const IbadahListPage = () => {
     deskripsi: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const fetchIbadah = async () => {
-    const token = localStorage.getItem("token");
-    const res = await axios.get("/api/ibadah", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setIbadahList(res.data);
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const res = await axios.get("/api/ibadah", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setIbadahList(res.data);
+    } catch (err) {
+      setError("Gagal memuat daftar ibadah.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -42,59 +50,153 @@ const IbadahListPage = () => {
     }
   };
 
+  if (loading) return <div className="text-center p-10">Loading...</div>;
+
   return (
-    <div>
-      <Link to="/dashboard" style={{ marginBottom: "20px", display: "block" }}>
-        Kembali ke Dashboard
+    <div className="space-y-6">
+      <Link
+        to="/dashboard"
+        className="text-sm font-medium text-blue-600 hover:text-blue-500"
+      >
+        ← Kembali ke Dashboard
       </Link>
-      <h2>Manajemen Ibadah</h2>
-
-      <h3>Buat Ibadah Baru</h3>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={onSubmit}>
-        <input
-          type="text"
-          name="nama"
-          placeholder="Nama Ibadah"
-          value={formData.nama}
-          onChange={onChange}
-          required
-        />
-        <input
-          type="date"
-          name="tanggal"
-          value={formData.tanggal}
-          onChange={onChange}
-          required
-        />
-        <select name="waktu" value={formData.waktu} onChange={onChange}>
-          <option value="Pagi">Pagi</option>
-          <option value="Siang">Siang</option>
-          <option value="Sore">Sore</option>
-        </select>
-        <textarea
-          name="deskripsi"
-          placeholder="Deskripsi (opsional)"
-          value={formData.deskripsi}
-          onChange={onChange}
-        ></textarea>
-        <button type="submit">Simpan Ibadah</button>
-      </form>
-
-      <hr />
-      <h3>Daftar Ibadah Terjadwal</h3>
-      <ul>
-        {ibadahList.map((ibadah) => (
-          <li key={ibadah.id}>
-            {ibadah.nama} -{" "}
-            {new Date(ibadah.tanggal).toLocaleDateString("id-ID")} (
-            {ibadah.waktu}){" - "}
-            <Link to={`/ibadah/${ibadah.id}`}>
-              Catat Kehadiran / Lihat Detail
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <h1 className="text-3xl font-bold text-gray-900">Manajemen Ibadah</h1>
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-lg font-medium leading-6 text-gray-900">
+          Buat Ibadah Baru
+        </h3>
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        <form
+          onSubmit={onSubmit}
+          className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end"
+        >
+          <div className="lg:col-span-2">
+            <label
+              htmlFor="nama"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Nama Ibadah
+            </label>
+            <input
+              id="nama"
+              type="text"
+              name="nama"
+              placeholder="cth: Ibadah Minggu Pagi"
+              value={formData.nama}
+              onChange={onChange}
+              required
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="tanggal"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Tanggal
+            </label>
+            <input
+              id="tanggal"
+              type="date"
+              name="tanggal"
+              value={formData.tanggal}
+              onChange={onChange}
+              required
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="waktu"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Waktu
+            </label>
+            <select
+              id="waktu"
+              name="waktu"
+              value={formData.waktu}
+              onChange={onChange}
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="Pagi">Pagi</option>
+              <option value="Siang">Siang</option>
+              <option value="Sore">Sore</option>
+            </select>
+          </div>
+          <div className="md:col-span-2 lg:col-span-1">
+            <button
+              type="submit"
+              className="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            >
+              Simpan Ibadah
+            </button>
+          </div>
+          <div className="md:col-span-2 lg:col-span-5">
+            <label
+              htmlFor="deskripsi"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Deskripsi (Opsional)
+            </label>
+            <textarea
+              id="deskripsi"
+              name="deskripsi"
+              value={formData.deskripsi}
+              onChange={onChange}
+              className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+            ></textarea>
+          </div>
+        </form>
+      </div>
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <h3 className="text-lg font-medium p-6 text-gray-900">
+          Daftar Ibadah Terjadwal
+        </h3>
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nama Ibadah
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Tanggal
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Waktu
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Aksi
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {ibadahList.map((ibadah) => (
+              <tr key={ibadah.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {ibadah.nama}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(ibadah.tanggal).toLocaleDateString("id-ID", {
+                    dateStyle: "long",
+                  })}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {ibadah.waktu}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <Link
+                    to={`/ibadah/${ibadah.id}`}
+                    className="text-indigo-600 hover:text-indigo-900"
+                  >
+                    Lihat Detail
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
