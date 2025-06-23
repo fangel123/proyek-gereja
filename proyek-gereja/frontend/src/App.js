@@ -6,6 +6,8 @@ import KlasifikasiPage from "./pages/KlasifikasiPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import IbadahListPage from "./pages/IbadahListPage";
 import IbadahDetailPage from "./pages/IbadahDetailPage";
+import DashboardPage from "./pages/DashboardPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
 function App() {
   return (
@@ -16,17 +18,11 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
 
           <Route element={<ProtectedRoute />}>
-            <Route
-              path="/dashboard"
-              element={
-                <div>
-                  <h1>Dashboard</h1>
-                </div>
-              }
-            />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/klasifikasi" element={<KlasifikasiPage />} />
             <Route path="/ibadah" element={<IbadahListPage />} />
             <Route path="/ibadah/:id" element={<IbadahDetailPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>
         </Routes>
       </div>

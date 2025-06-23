@@ -44,6 +44,9 @@ const IbadahListPage = () => {
 
   return (
     <div>
+      <Link to="/dashboard" style={{ marginBottom: "20px", display: "block" }}>
+        Kembali ke Dashboard
+      </Link>
       <h2>Manajemen Ibadah</h2>
 
       <h3>Buat Ibadah Baru</h3>
