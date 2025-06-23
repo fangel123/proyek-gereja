@@ -1,6 +1,7 @@
 const PdfPrinter = require("pdfmake");
 const path = require("path");
 const pool = require("../db");
+const ExcelJS = require("exceljs");
 
 exports.exportAgendaToPdf = async (req, res) => {
   try {
@@ -118,6 +119,50 @@ exports.exportAgendaToPdf = async (req, res) => {
     );
     pdfDoc.pipe(res);
     pdfDoc.end();
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+exports.exportKehadiranToExcel = async (req, res) => {
+  try {
+    const query = `
+            SELECT 
+                i.tanggal,
+                i.nama AS nama_ibadah,
+                k.nama AS nama_klasifikasi,
+                h.jumlah_hadir
+            FROM kehadiran h
+            JOIN ibadah i ON h.ibadah_id = i.id
+            JOIN klasifikasi k ON h.klasifikasi_id = k.id
+            ORDER BY i.tanggal, i.nama, k.nama;
+        `;
+    const { rows } = await pool.query(query);
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Laporan Kehadiran");
+
+    worksheet.columns = [
+      { header: "Tanggal", key: "tanggal", width: 15 },
+      { header: "Nama Ibadah", key: "nama_ibadah", width: 30 },
+      { header: "Klasifikasi Jemaat", key: "nama_klasifikasi", width: 25 },
+      { header: "Jumlah Hadir", key: "jumlah_hadir", width: 15 },
+    ];
+
+    worksheet.addRows(rows);
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=" + "laporan-kehadiran.xlsx"
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");

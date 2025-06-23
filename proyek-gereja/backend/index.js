@@ -18,8 +18,14 @@ app.get(
   authMiddleware,
   exportController.exportAgendaToPdf
 );
+app.use("/api/analytics", require("./routes/analyticsRoutes"));
+app.get(
+  "/api/export/kehadiran/excel",
+  authMiddleware,
+  exportController.exportKehadiranToExcel
+);
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("Halo dari Backend Sistem Gereja!");
 });
 

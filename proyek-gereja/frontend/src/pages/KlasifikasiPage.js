@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const KlasifikasiPage = () => {
   const [klasifikasiList, setKlasifikasiList] = useState([]);
@@ -49,6 +50,9 @@ const KlasifikasiPage = () => {
 
   return (
     <div>
+      <Link to="/dashboard" style={{ marginBottom: "20px", display: "block" }}>
+        Kembali ke Dashboard
+      </Link>
       <h2>Manajemen Klasifikasi Jemaat</h2>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={onSubmit}>
