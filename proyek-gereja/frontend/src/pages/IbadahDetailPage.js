@@ -14,17 +14,21 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
     onSave(formData);
   };
 
+  const inputStyle =
+    "w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm";
+
   return (
-    <tr>
-      <td>
+    <tr className="border-b border-gray-200">
+      <td className="px-6 py-4">
         <input
           type="number"
           name="urutan"
           value={formData.urutan}
           onChange={(e) => setFormData({ ...formData, urutan: e.target.value })}
+          className={inputStyle + "text-sm text-gray-900"}
         />
       </td>
-      <td>
+      <td className="px-6 py-4">
         <input
           type="text"
           name="nama_agenda"
@@ -32,9 +36,10 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
           onChange={(e) =>
             setFormData({ ...formData, nama_agenda: e.target.value })
           }
+          className={inputStyle + "text-sm font-medium text-gray-900"}
         />
       </td>
-      <td>
+      <td className="px-6 py-4">
         <input
           type="text"
           name="penanggung_jawab"
@@ -42,13 +47,22 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
           onChange={(e) =>
             setFormData({ ...formData, penanggung_jawab: e.target.value })
           }
+          className={inputStyle + "text-sm text-gray-900"}
         />
       </td>
-      <td>
-        <button type="button" onClick={handleSubmit}>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="text-indigo-600 hover:text-indigo-900"
+        >
           Simpan
         </button>
-        <button type="button" onClick={onCancel}>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="ml-4 text-gray-600 hover:text-gray-900"
+        >
           Batal
         </button>
       </td>
@@ -70,6 +84,7 @@ const IbadahDetailPage = () => {
     nama_agenda: "",
     penanggung_jawab: "",
   });
+
   const [editingId, setEditingId] = useState(null);
 
   const fetchData = useCallback(async () => {
@@ -223,149 +238,211 @@ const IbadahDetailPage = () => {
     return state.ibadah?.agenda.find((item) => item.id === editingId) || null;
   }, [editingId, state.ibadah]);
 
-  if (state.loading) return <div>Loading...</div>;
-  if (state.error) return <p style={{ color: "red" }}>{state.error}</p>;
-  if (!state.ibadah) return <div>Data ibadah tidak ditemukan.</div>;
+  if (state.loading) return <div className="text-center p-10">Loading...</div>;
+  if (state.error)
+    return <p className="text-center p-10 text-red-600">{state.error}</p>;
+  if (!state.ibadah)
+    return <div className="text-center p-10">Data ibadah tidak ditemukan.</div>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <Link to="/ibadah" style={{ marginBottom: "20px", display: "block" }}>
-        Kembali ke Daftar Ibadah
-      </Link>
-
-      <h1>Detail Ibadah: {state.ibadah.nama}</h1>
-      <p>
-        Tanggal: {new Date(state.ibadah.tanggal).toLocaleDateString("id-ID")} (
-        {state.ibadah.waktu})
-      </p>
-
-      <button onClick={handleExportPdf} style={{ marginBottom: "20px" }}>
-        Export Agenda ke PDF
-      </button>
-
-      <section style={{ margin: "20px 0" }}>
-        <h3>Pencatatan Kehadiran</h3>
-        {state.message && <p style={{ color: "green" }}>{state.message}</p>}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "200px 1fr",
-            gap: "10px",
-            marginBottom: "10px",
-          }}
-        >
-          {state.kehadiran.map((item, index) => (
-            <React.Fragment key={item.klasifikasi_id}>
-              <label>{item.nama}:</label>
-              <input
-                type="number"
-                value={item.jumlah_hadir}
-                onChange={(e) => handleKehadiranChange(index, e.target.value)}
-                style={{ width: "100px" }}
-              />
-            </React.Fragment>
-          ))}
+    <div className="space-y-8">
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <Link
+            to="/ibadah"
+            className="text-sm font-medium text-blue-600 hover:text-blue-500"
+          >
+            ← Kembali ke Daftar Ibadah
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 mt-1">
+            Detail Ibadah: {state.ibadah.nama}
+          </h1>
+          <p className="text-md text-gray-600">
+            Tanggal:{" "}
+            {new Date(state.ibadah.tanggal).toLocaleDateString("id-ID", {
+              dateStyle: "full",
+            })}{" "}
+            ({state.ibadah.waktu})
+          </p>
         </div>
-        <button onClick={handleSaveKehadiran}>Simpan Kehadiran</button>
-      </section>
-
-      <section style={{ margin: "20px 0" }}>
-        <h3>Susunan Acara</h3>
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginBottom: "20px",
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: "#f2f2f2" }}>
-              <th style={{ padding: "10px", textAlign: "left" }}>No</th>
-              <th style={{ padding: "10px", textAlign: "left" }}>Agenda</th>
-              <th style={{ padding: "10px", textAlign: "left" }}>
-                Penanggung Jawab
-              </th>
-              <th style={{ padding: "10px", textAlign: "left" }}>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {state.ibadah.agenda.map((item) => (
-              <React.Fragment key={item.id}>
-                {editingId === item.id ? (
-                  <EditAgendaRow
-                    agenda={editingAgenda}
-                    onSave={handleUpdateAgenda}
-                    onCancel={() => setEditingId(null)}
-                  />
-                ) : (
-                  <tr style={{ borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: "10px" }}>{item.urutan}</td>
-                    <td style={{ padding: "10px" }}>{item.nama_agenda}</td>
-                    <td style={{ padding: "10px" }}>{item.penanggung_jawab}</td>
-                    <td style={{ padding: "10px" }}>
-                      <button
-                        onClick={() => handleEditClick(item.id)}
-                        style={{ marginRight: "5px" }}
-                      >
-                        Edit
-                      </button>
-                      <button onClick={() => handleDeleteAgenda(item.id)}>
-                        Hapus
-                      </button>
-                    </td>
+        <div>
+          <button
+            onClick={handleExportPdf}
+            className="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          >
+            Export Agenda ke PDF
+          </button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+              Susunan Acara
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Agenda
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Penanggung Jawab
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Aksi
+                    </th>
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {state.ibadah.agenda.map((item) =>
+                    editingId === item.id ? (
+                      <EditAgendaRow
+                        key={item.id}
+                        agenda={editingAgenda}
+                        onSave={handleUpdateAgenda}
+                        onCancel={() => setEditingId(null)}
+                      />
+                    ) : (
+                      <tr key={item.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.urutan}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {item.nama_agenda}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {item.penanggung_jawab}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => handleEditClick(item.id)}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAgenda(item.id)}
+                            className="ml-4 text-red-600 hover:text-red-900"
+                          >
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-        <h4>Tambah Agenda Baru</h4>
-        <form
-          onSubmit={handleAddAgenda}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "10px",
-            alignItems: "end",
-          }}
-        >
-          <div>
-            <label>Urutan</label>
-            <input
-              type="number"
-              name="urutan"
-              value={agendaForm.urutan}
-              onChange={handleAgendaChange}
-              style={{ width: "100%" }}
-            />
+            <div className="mt-6 pt-6 border-t">
+              <h4 className="font-semibold text-gray-800">
+                Tambah Agenda Baru
+              </h4>
+              <form
+                onSubmit={handleAddAgenda}
+                className="mt-2 grid grid-cols-1 sm:grid-cols-4 gap-4 items-end"
+              >
+                <div className="sm:col-span-1">
+                  <label
+                    htmlFor="urutan"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Urutan
+                  </label>
+                  <input
+                    id="urutan"
+                    type="number"
+                    name="urutan"
+                    value={agendaForm.urutan}
+                    onChange={handleAgendaChange}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label
+                    htmlFor="nama_agenda"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Nama Agenda
+                  </label>
+                  <input
+                    id="nama_agenda"
+                    type="text"
+                    name="nama_agenda"
+                    placeholder="cth: Pujian Pembuka"
+                    value={agendaForm.nama_agenda}
+                    onChange={handleAgendaChange}
+                    required
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                  />
+                </div>
+                <div className="sm:col-span-1">
+                  <label
+                    htmlFor="penanggung_jawab"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    PJ
+                  </label>
+                  <input
+                    id="penanggung_jawab"
+                    type="text"
+                    name="penanggung_jawab"
+                    placeholder="cth: Tim Musik"
+                    value={agendaForm.penanggung_jawab}
+                    onChange={handleAgendaChange}
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="sm:col-start-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  Tambah Agenda
+                </button>
+              </form>
+            </div>
           </div>
-          <div>
-            <label>Nama Agenda</label>
-            <input
-              type="text"
-              name="nama_agenda"
-              placeholder="Nama Agenda"
-              value={agendaForm.nama_agenda}
-              onChange={handleAgendaChange}
-              required
-              style={{ width: "100%" }}
-            />
+        </div>
+
+        {/* Kolom Kanan: Kehadiran */}
+        <div className="lg:col-span-1 bg-white shadow-md rounded-lg p-6 h-fit">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Pencatatan Kehadiran
+          </h3>
+          {state.message && (
+            <p className="text-sm text-green-600 mb-2">{state.message}</p>
+          )}
+          <div className="space-y-4">
+            {state.kehadiran.map((item, index) => (
+              <div
+                key={item.klasifikasi_id}
+                className="flex justify-between items-center"
+              >
+                <label className="font-medium text-gray-700">
+                  {item.nama}:
+                </label>
+                <input
+                  type="number"
+                  value={item.jumlah_hadir}
+                  onChange={(e) => handleKehadiranChange(index, e.target.value)}
+                  className="w-24 text-center px-2 py-1 border border-gray-300 rounded-md shadow-sm"
+                />
+              </div>
+            ))}
           </div>
-          <div>
-            <label>Penanggung Jawab</label>
-            <input
-              type="text"
-              name="penanggung_jawab"
-              placeholder="Penanggung Jawab"
-              value={agendaForm.penanggung_jawab}
-              onChange={handleAgendaChange}
-              style={{ width: "100%" }}
-            />
-          </div>
-          <button type="submit">Tambah Agenda</button>
-        </form>
-      </section>
+          <button
+            onClick={handleSaveKehadiran}
+            className="mt-6 w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          >
+            Simpan Kehadiran
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
