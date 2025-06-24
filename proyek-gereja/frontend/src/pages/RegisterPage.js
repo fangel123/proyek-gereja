@@ -18,7 +18,10 @@ const RegisterPage = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/auth/register", { email, password });
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/register`,
+        { email, password }
+      );
       setMessage(res.data.message);
     } catch (error) {
       setMessage(error.response.data.message || "Terjadi kesalahan");

@@ -11,11 +11,14 @@ const KlasifikasiPage = () => {
   const fetchKlasifikasi = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("/api/klasifikasi", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/klasifikasi`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setKlasifikasiList(res.data);
       setLoading(false);
     } catch (err) {
@@ -33,7 +36,7 @@ const KlasifikasiPage = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "/api/klasifikasi",
+        `${process.env.REACT_APP_API_URL}/api/klasifikasi`,
         { nama },
         {
           headers: { Authorization: `Bearer ${token}` },

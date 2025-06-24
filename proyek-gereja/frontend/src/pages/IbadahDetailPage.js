@@ -91,9 +91,12 @@ const IbadahDetailPage = () => {
     try {
       setState((prev) => ({ ...prev, loading: true, error: "" }));
       const token = localStorage.getItem("token");
-      const res = await axios.get(`/api/ibadah/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/ibadah/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setState((prev) => ({
         ...prev,
@@ -134,7 +137,7 @@ const IbadahDetailPage = () => {
       setState((prev) => ({ ...prev, message: "", error: "" }));
       const token = localStorage.getItem("token");
       const res = await axios.put(
-        `/api/ibadah/${id}/kehadiran`,
+        `${process.env.REACT_APP_API_URL}/api/ibadah/${id}/kehadiran`,
         { kehadiran: state.kehadiran },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -156,9 +159,13 @@ const IbadahDetailPage = () => {
       e.preventDefault();
       try {
         const token = localStorage.getItem("token");
-        await axios.post(`/api/ibadah/${id}/agenda`, agendaForm, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/ibadah/${id}/agenda`,
+          agendaForm,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         await fetchData();
       } catch (err) {
         setState((prev) => ({ ...prev, error: "Gagal menambah agenda." }));
@@ -172,9 +179,12 @@ const IbadahDetailPage = () => {
       if (window.confirm("Yakin ingin menghapus item agenda ini?")) {
         try {
           const token = localStorage.getItem("token");
-          await axios.delete(`/api/ibadah/${id}/agenda/${agendaId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await axios.delete(
+            `${process.env.REACT_APP_API_URL}/api/ibadah/${id}/agenda/${agendaId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
           await fetchData();
         } catch (err) {
           setState((prev) => ({ ...prev, error: "Gagal menghapus agenda." }));
@@ -193,7 +203,7 @@ const IbadahDetailPage = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await axios.put(
-          `/api/ibadah/${id}/agenda/${editingId}`,
+          `${process.env.REACT_APP_API_URL}/api/ibadah/${id}/agenda/${editingId}`,
           formData,
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -218,10 +228,13 @@ const IbadahDetailPage = () => {
   const handleExportPdf = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(`/api/export/ibadah/${id}/pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/export/ibadah/${id}/pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob",
+        }
+      );
       const fileURL = window.URL.createObjectURL(new Blob([response.data]));
       const fileLink = document.createElement("a");
       fileLink.href = fileURL;
