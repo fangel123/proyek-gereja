@@ -4,7 +4,7 @@ Aplikasi web full-stack sederhana untuk manajemen data gereja. Proyek ini dibang
 
 ### ✨ Demo Aplikasi
 
-[![Screenshot Aplikasi](/dashboard.png)](https://proyek-gereja.vercel.app/)
+[![Screenshot Aplikasi](./dashboard.png)](https://proyek-gereja.vercel.app/)
 
 **Aplikasi Live:** [proyek-gereja.vercel.app](https://proyek-gereja.vercel.app/)
 
