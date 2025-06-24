@@ -37,7 +37,6 @@ const AnalyticsPage = () => {
     try {
       const token = localStorage.getItem("token");
 
-      // Bangun query string berdasarkan state filter
       const params = new URLSearchParams();
       if (startDate && endDate) {
         params.append("startDate", startDate);
@@ -115,8 +114,6 @@ const AnalyticsPage = () => {
         link.remove();
       });
   };
-
-  // if (loading) return <div className="text-center p-10">Loading...</div>;
 
   return (
     <div className="space-y-6">
