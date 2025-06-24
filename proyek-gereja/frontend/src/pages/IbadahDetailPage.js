@@ -25,7 +25,7 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
           name="urutan"
           value={formData.urutan}
           onChange={(e) => setFormData({ ...formData, urutan: e.target.value })}
-          className={inputStyle + "text-sm text-gray-900"}
+          className={inputStyle + "text-sm text-gray-900 text-center"}
         />
       </td>
       <td className="px-6 py-4">

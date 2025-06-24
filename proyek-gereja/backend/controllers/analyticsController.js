@@ -2,17 +2,46 @@ const pool = require("../db");
 const ExcelJS = require("exceljs");
 
 exports.getKehadiranAnalytics = async (req, res) => {
+  const { startDate, endDate, klasifikasiId } = req.query;
+
   try {
-    const query = `
+    let query = `
             SELECT 
                 i.tanggal, 
                 SUM(h.jumlah_hadir) AS total_kehadiran
             FROM kehadiran h
             JOIN ibadah i ON h.ibadah_id = i.id
-            GROUP BY i.tanggal
-            ORDER BY i.tanggal ASC;
         `;
-    const result = await pool.query(query);
+    const params = [];
+    const whereClauses = [];
+    let paramIndex = 1;
+
+    if (startDate && endDate) {
+      whereClauses.push(
+        `i.tanggal BETWEEN $${paramIndex++} AND $${paramIndex++}`
+      );
+      params.push(startDate);
+      params.push(endDate);
+    }
+
+    if (klasifikasiId) {
+      whereClauses.push(`h.klasifikasi_id = $${paramIndex++}`);
+      params.push(klasifikasiId);
+    }
+
+    if (whereClauses.length > 0) {
+      query += ` WHERE ${whereClauses.join(" AND ")}`;
+    }
+
+    query += `
+      GROUP BY i.tanggal
+      ORDER BY i.tanggal ASC;
+    `;
+
+    console.log("Executing Query:", query);
+    console.log("With Params:", params);
+    const result = await pool.query(query, params);
+
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -56,6 +85,18 @@ exports.getDashboardSummary = async (req, res) => {
         total: 0,
       },
     });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+exports.getAllKlasifikasi = async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, nama FROM klasifikasi ORDER BY nama ASC"
+    );
+    res.json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
