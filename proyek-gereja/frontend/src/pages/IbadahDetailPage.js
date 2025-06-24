@@ -19,16 +19,18 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
 
   return (
     <tr className="border-b border-gray-200">
-      <td className="px-6 py-4">
+      <td className="px-3 sm:px-6 py-4 w-16 sm:w-auto">
         <input
           type="number"
           name="urutan"
           value={formData.urutan}
           onChange={(e) => setFormData({ ...formData, urutan: e.target.value })}
-          className={inputStyle + "text-sm text-gray-900 text-center"}
+          className={
+            inputStyle + " text-sm text-gray-900 text-center min-w-[50px]"
+          }
         />
       </td>
-      <td className="px-6 py-4">
+      <td className="px-3 sm:px-6 py-4">
         <input
           type="text"
           name="nama_agenda"
@@ -36,10 +38,10 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
           onChange={(e) =>
             setFormData({ ...formData, nama_agenda: e.target.value })
           }
-          className={inputStyle + "text-sm font-medium text-gray-900"}
+          className={inputStyle + " text-sm font-medium text-gray-900"}
         />
       </td>
-      <td className="px-6 py-4">
+      <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
         <input
           type="text"
           name="penanggung_jawab"
@@ -47,24 +49,39 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
           onChange={(e) =>
             setFormData({ ...formData, penanggung_jawab: e.target.value })
           }
-          className={inputStyle + "text-sm text-gray-900"}
+          className={inputStyle + " text-sm text-gray-900"}
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="text-indigo-600 hover:text-indigo-900"
-        >
-          Simpan
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="ml-4 text-gray-600 hover:text-gray-900"
-        >
-          Batal
-        </button>
+      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex flex-col sm:flex-row gap-1 sm:gap-0">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="text-indigo-600 hover:text-indigo-900 text-xs sm:text-sm"
+          >
+            Simpan
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="sm:ml-4 text-gray-600 hover:text-gray-900 text-xs sm:text-sm"
+          >
+            Batal
+          </button>
+        </div>
+        {/* Mobile PJ input */}
+        <div className="sm:hidden mt-2">
+          <input
+            type="text"
+            name="penanggung_jawab"
+            value={formData.penanggung_jawab}
+            onChange={(e) =>
+              setFormData({ ...formData, penanggung_jawab: e.target.value })
+            }
+            placeholder="Penanggung Jawab"
+            className={inputStyle + " text-xs text-gray-900"}
+          />
+        </div>
       </td>
     </tr>
   );
@@ -267,10 +284,10 @@ const IbadahDetailPage = () => {
           >
             ← Kembali ke Daftar Ibadah
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
             Detail Ibadah: {state.ibadah.nama}
           </h1>
-          <p className="text-md text-gray-600">
+          <p className="text-sm sm:text-md text-gray-600">
             Tanggal:{" "}
             {new Date(state.ibadah.tanggal).toLocaleDateString("id-ID", {
               dateStyle: "full",
@@ -281,84 +298,94 @@ const IbadahDetailPage = () => {
         <div>
           <button
             onClick={handleExportPdf}
-            className="px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            className="px-3 sm:px-4 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-sm sm:text-base"
           >
-            Export Agenda ke PDF
+            Export PDF
           </button>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+          <div className="bg-white shadow-md rounded-lg p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
               Susunan Acara
             </h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      No
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Agenda
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Penanggung Jawab
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aksi
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {state.ibadah.agenda.map((item) =>
-                    editingId === item.id ? (
-                      <EditAgendaRow
-                        key={item.id}
-                        agenda={editingAgenda}
-                        onSave={handleUpdateAgenda}
-                        onCancel={() => setEditingId(null)}
-                      />
-                    ) : (
-                      <tr key={item.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {item.urutan}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {item.nama_agenda}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {item.penanggung_jawab}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => handleEditClick(item.id)}
-                            className="text-indigo-600 hover:text-indigo-900"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteAgenda(item.id)}
-                            className="ml-4 text-red-600 hover:text-red-900"
-                          >
-                            Hapus
-                          </button>
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 sm:w-auto">
+                        No
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Agenda
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                        Penanggung Jawab
+                      </th>
+                      <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {state.ibadah.agenda.map((item) =>
+                      editingId === item.id ? (
+                        <EditAgendaRow
+                          key={item.id}
+                          agenda={editingAgenda}
+                          onSave={handleUpdateAgenda}
+                          onCancel={() => setEditingId(null)}
+                        />
+                      ) : (
+                        <tr key={item.id}>
+                          <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center w-16 sm:w-auto">
+                            {item.urutan}
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900">
+                            <div className="break-words">
+                              {item.nama_agenda}
+                            </div>
+                            {/* Show PJ on mobile below agenda name */}
+                            <div className="sm:hidden text-xs text-gray-500 mt-1">
+                              PJ: {item.penanggung_jawab || "-"}
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
+                            {item.penanggung_jawab}
+                          </td>
+                          <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex flex-col sm:flex-row gap-1 sm:gap-0">
+                              <button
+                                onClick={() => handleEditClick(item.id)}
+                                className="text-indigo-600 hover:text-indigo-900 text-xs sm:text-sm"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteAgenda(item.id)}
+                                className="sm:ml-4 text-red-600 hover:text-red-900 text-xs sm:text-sm"
+                              >
+                                Hapus
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <div className="mt-6 pt-6 border-t">
-              <h4 className="font-semibold text-gray-800">
+              <h4 className="font-semibold text-gray-800 text-sm sm:text-base">
                 Tambah Agenda Baru
               </h4>
               <form
                 onSubmit={handleAddAgenda}
-                className="mt-2 grid grid-cols-1 sm:grid-cols-4 gap-4 items-end"
+                className="mt-4 space-y-4 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-4 sm:items-end"
               >
                 <div className="sm:col-span-1">
                   <label
@@ -373,7 +400,7 @@ const IbadahDetailPage = () => {
                     name="urutan"
                     value={agendaForm.urutan}
                     onChange={handleAgendaChange}
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm"
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -391,7 +418,7 @@ const IbadahDetailPage = () => {
                     value={agendaForm.nama_agenda}
                     onChange={handleAgendaChange}
                     required
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm"
                   />
                 </div>
                 <div className="sm:col-span-1">
@@ -408,12 +435,12 @@ const IbadahDetailPage = () => {
                     placeholder="cth: Tim Musik"
                     value={agendaForm.penanggung_jawab}
                     onChange={handleAgendaChange}
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="sm:col-start-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  className="w-full sm:w-auto sm:col-start-4 px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 text-sm"
                 >
                   Tambah Agenda
                 </button>
@@ -423,8 +450,8 @@ const IbadahDetailPage = () => {
         </div>
 
         {/* Kolom Kanan: Kehadiran */}
-        <div className="lg:col-span-1 bg-white shadow-md rounded-lg p-6 h-fit">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+        <div className="lg:col-span-1 bg-white shadow-md rounded-lg p-4 sm:p-6 h-fit">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">
             Pencatatan Kehadiran
           </h3>
           {state.message && (
@@ -436,21 +463,21 @@ const IbadahDetailPage = () => {
                 key={item.klasifikasi_id}
                 className="flex justify-between items-center"
               >
-                <label className="font-medium text-gray-700">
+                <label className="font-medium text-gray-700 text-sm">
                   {item.nama}:
                 </label>
                 <input
                   type="number"
                   value={item.jumlah_hadir}
                   onChange={(e) => handleKehadiranChange(index, e.target.value)}
-                  className="w-24 text-center px-2 py-1 border border-gray-300 rounded-md shadow-sm"
+                  className="w-20 sm:w-24 text-center px-2 py-1 border border-gray-300 rounded-md shadow-sm text-sm"
                 />
               </div>
             ))}
           </div>
           <button
             onClick={handleSaveKehadiran}
-            className="mt-6 w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            className="mt-6 w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 text-sm"
           >
             Simpan Kehadiran
           </button>

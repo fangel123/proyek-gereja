@@ -160,7 +160,37 @@ const IbadahListPage = () => {
         <h3 className="text-lg font-medium p-6 text-gray-900">
           Daftar Ibadah Terjadwal
         </h3>
-        <div className="overflow-x-auto">
+        <div className="md:hidden space-y-4 p-4">
+          {ibadahList.map((ibadah) => (
+            <div key={ibadah.id} className="border rounded-lg p-4">
+              <div className="flex justify-between">
+                <span className="font-medium">Nama:</span>
+                <span>{ibadah.nama}</span>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="font-medium">Tanggal:</span>
+                <span>
+                  {new Date(ibadah.tanggal).toLocaleDateString("id-ID", {
+                    dateStyle: "long",
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between mt-2">
+                <span className="font-medium">Waktu:</span>
+                <span>{ibadah.waktu}</span>
+              </div>
+              <div className="mt-3 text-right">
+                <Link
+                  to={`/ibadah/${ibadah.id}`}
+                  className="text-sm text-indigo-600 hover:text-indigo-900"
+                >
+                  Lihat Detail
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
