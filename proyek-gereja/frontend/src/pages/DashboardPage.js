@@ -10,9 +10,12 @@ const DashboardPage = () => {
     const fetchSummary = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("/api/analytics/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/analytics/dashboard`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setSummary(res.data);
         setLoading(false);
       } catch (err) {

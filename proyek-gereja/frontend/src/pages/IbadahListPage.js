@@ -17,9 +17,12 @@ const IbadahListPage = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get("/api/ibadah", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/ibadah`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setIbadahList(res.data);
     } catch (err) {
       setError("Gagal memuat daftar ibadah.");
@@ -40,9 +43,13 @@ const IbadahListPage = () => {
     setError("");
     try {
       const token = localStorage.getItem("token");
-      await axios.post("/api/ibadah", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/ibadah`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setFormData({ nama: "", tanggal: "", waktu: "Pagi", deskripsi: "" });
       fetchIbadah();
     } catch (err) {

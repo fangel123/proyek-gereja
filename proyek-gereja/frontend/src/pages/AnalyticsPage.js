@@ -32,9 +32,12 @@ const AnalyticsPage = () => {
     const fetchAnalytics = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("/api/analytics/kehadiran", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/analytics/kehadiran`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const data = {
           labels: res.data.map((d) =>
@@ -62,7 +65,7 @@ const AnalyticsPage = () => {
   const handleExportExcel = () => {
     const token = localStorage.getItem("token");
     axios
-      .get("/api/export/kehadiran/excel", {
+      .get(`${process.env.REACT_APP_API_URL}/api/export/kehadiran/excel`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: "blob",
       })
