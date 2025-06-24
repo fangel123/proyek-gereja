@@ -8,6 +8,7 @@ import IbadahListPage from "./pages/IbadahListPage";
 import IbadahDetailPage from "./pages/IbadahDetailPage";
 import DashboardPage from "./pages/DashboardPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import RootGate from "./components/RootGate";
 
 function App() {
   return (
@@ -15,6 +16,8 @@ function App() {
       <Router>
         <div className="container mx-auto p-4">
           <Routes>
+            <Route path="/" element={<RootGate />} />
+
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
 
