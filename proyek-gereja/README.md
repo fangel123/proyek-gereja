@@ -103,8 +103,6 @@ git clone https://github.com/fangel123/proyek-gereja.git
 cd proyek-gereja
 ```
 
-*(Ganti dengan URL repository Anda)*
-
 **2. Setup Backend**
 
 ```bash
