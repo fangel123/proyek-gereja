@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../api/api";
+import { motion } from "framer-motion";
+import { FiMail, FiLock, FiLogIn, FiUserPlus } from "react-icons/fi";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +10,7 @@ const LoginPage = () => {
     password: "",
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const { email, password } = formData;
@@ -17,79 +20,190 @@ const LoginPage = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/login`,
-        { email, password }
-      );
-      localStorage.setItem("token", res.data.token);
+    setIsLoading(true);
+    setError("");
 
+    try {
+      const res = await api.post("/api/auth/login", { email, password });
+      localStorage.setItem("token", res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response.data.message || "Terjadi kesalahan saat login");
+      setError(err.response?.data?.message || "Login gagal");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh]">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-3xl font-bold text-center text-gray-900">
-          Login ke Akun anda
-        </h2>
-        <form className="space-y-6" onSubmit={onSubmit}>
-          <div>
-            <label htmlFor="email" className="block font-medium text-gray-700">
-              Alamat Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              value={email}
-              onChange={onChange}
-              required
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="email@mail.com"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-center">
+            <h2 className="text-2xl font-bold text-white">
+              Selamat Datang Kembali
+            </h2>
+            <p className="text-blue-100 mt-1">Masuk untuk melanjutkan</p>
           </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="block font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              value={password}
-              onChange={onChange}
-              required
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="........"
-            />
+
+          <div className="p-8">
+            <form className="space-y-6" onSubmit={onSubmit}>
+              <div className="space-y-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Alamat Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiMail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={onChange}
+                    required
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                    placeholder="email@contoh.com"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiLock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    value={password}
+                    onChange={onChange}
+                    required
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="p-3 text-sm text-red-700 bg-red-50 rounded-lg"
+                >
+                  {error}
+                </motion.div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="remember-me"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
+                    Ingat saya
+                  </label>
+                </div>
+                <div className="text-sm">
+                  <Link
+                    to="/forgot-password"
+                    className="font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    Lupa password?
+                  </Link>
+                </div>
+              </div>
+
+              <div>
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={isLoading}
+                  className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                    isLoading ? "opacity-75 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Memproses...
+                    </>
+                  ) : (
+                    <>
+                      <FiLogIn className="mr-2" />
+                      Masuk
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </form>
+
+            <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Atau</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Belum punya akun?{" "}
+                <Link
+                  to="/register"
+                  className="font-medium text-blue-600 hover:text-blue-500 inline-flex items-center"
+                >
+                  <FiUserPlus className="mr-1" /> Daftar sekarang
+                </Link>
+              </p>
+            </div>
           </div>
-          {error && <p className="text-sm text-center text-red-600">{error}</p>}
-          <div>
-            <button
-              type="submit"
-              className="w-full px-4 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Login
-            </button>
-          </div>
-        </form>
-        <p className="text-sm text-center text-gray-600">
-          Belum punya akun?{" "}
-          <Link
-            to="/register"
-            className="font-medium text-blue-600 hover:text-blue-500"
-          >
-            Daftar di sini
-          </Link>
-        </p>
-      </div>
+        </div>
+      </motion.div>
     </div>
   );
 };

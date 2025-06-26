@@ -1,17 +1,68 @@
 const pool = require("../db");
-const ExcelJS = require("exceljs");
+const { z } = require("zod");
+
+const analyticsSchema = {
+  getKehadiranAnalytics: z
+    .object({
+      startDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, {
+          message: "Format tanggal harus YYYY-MM-DD",
+        })
+        .optional(),
+      endDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, {
+          message: "Format tanggal harus YYYY-MM-DD",
+        })
+        .optional(),
+      klasifikasiId: z
+        .string()
+        .regex(/^\d+$/, { message: "ID klasifikasi harus angka" })
+        .transform(Number)
+        .optional(),
+    })
+    .refine(
+      (data) => {
+        if (data.startDate && !data.endDate) return false;
+        if (!data.startDate && data.endDate) return false;
+        if (data.startDate && data.endDate && data.startDate > data.endDate)
+          return false;
+        return true;
+      },
+      {
+        message: "Tanggal mulai harus sebelum tanggal akhir",
+        path: ["dateRange"],
+      }
+    ),
+};
 
 exports.getKehadiranAnalytics = async (req, res) => {
-  const { startDate, endDate, klasifikasiId } = req.query;
+  const validation = analyticsSchema.getKehadiranAnalytics.safeParse(req.query);
+
+  if (!validation.success) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: "VALIDATION_ERROR",
+        details: validation.error.flatten(),
+      },
+    });
+  }
+
+  const { startDate, endDate, klasifikasiId } = validation.data;
 
   try {
     let query = `
-            SELECT 
-                i.tanggal, 
-                SUM(h.jumlah_hadir) AS total_kehadiran
-            FROM kehadiran h
-            JOIN ibadah i ON h.ibadah_id = i.id
-        `;
+      SELECT 
+        i.tanggal, 
+        k.nama as klasifikasi,
+        SUM(h.jumlah_hadir) AS total_kehadiran
+      FROM kehadiran h
+      JOIN ibadah i ON h.ibadah_id = i.id
+      JOIN klasifikasi k ON h.klasifikasi_id = k.id
+    `;
+
     const params = [];
     const whereClauses = [];
     let paramIndex = 1;
@@ -20,8 +71,7 @@ exports.getKehadiranAnalytics = async (req, res) => {
       whereClauses.push(
         `i.tanggal BETWEEN $${paramIndex++} AND $${paramIndex++}`
       );
-      params.push(startDate);
-      params.push(endDate);
+      params.push(startDate, endDate);
     }
 
     if (klasifikasiId) {
@@ -34,60 +84,81 @@ exports.getKehadiranAnalytics = async (req, res) => {
     }
 
     query += `
-      GROUP BY i.tanggal
+      GROUP BY i.tanggal, k.nama
       ORDER BY i.tanggal ASC;
     `;
 
-    console.log("Executing Query:", query);
-    console.log("With Params:", params);
     const result = await pool.query(query, params);
 
-    res.json(result.rows);
+    res.json({
+      success: true,
+      data: result.rows,
+      meta: {
+        startDate,
+        endDate,
+        klasifikasiId,
+        totalRecords: result.rowCount,
+      },
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
+    console.error("Error getKehadiranAnalytics:", err.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "SERVER_ERROR",
+        message: "Gagal mengambil data analitik kehadiran",
+      },
+    });
   }
 };
 
 exports.getDashboardSummary = async (req, res) => {
   try {
-    const totalMingguIniRes = await pool.query(`
-            SELECT COALESCE(SUM(jumlah_hadir), 0) as total
-            FROM kehadiran
-            WHERE ibadah_id IN (
-                SELECT id FROM ibadah WHERE tanggal BETWEEN date_trunc('week', NOW()) AND date_trunc('week', NOW()) + interval '6 days'
-            )
-        `);
-
-    const ibadahTeramaiRes = await pool.query(`
-            SELECT i.nama, SUM(h.jumlah_hadir) as total
-            FROM kehadiran h
-            JOIN ibadah i ON h.ibadah_id = i.id
-            GROUP BY i.id, i.nama
-            ORDER BY total DESC
-            LIMIT 1;
-        `);
-
-    const klasifikasiTeramaiRes = await pool.query(`
-            SELECT k.nama, SUM(h.jumlah_hadir) as total
-            FROM kehadiran h
-            JOIN klasifikasi k ON h.klasifikasi_id = k.id
-            GROUP BY k.id, k.nama
-            ORDER BY total DESC
-            LIMIT 1;
-        `);
+    const [totalMingguIniRes, ibadahTeramaiRes, klasifikasiTeramaiRes] =
+      await Promise.all([
+        pool.query(
+          `SELECT COALESCE(SUM(jumlah_hadir), 0) as total 
+           FROM kehadiran 
+           WHERE ibadah_id IN (
+             SELECT id FROM ibadah 
+             WHERE tanggal BETWEEN date_trunc('week', NOW()) AND date_trunc('week', NOW()) + interval '6 days'
+           )`
+        ),
+        pool.query(
+          `SELECT i.id, i.nama, i.tanggal, SUM(h.jumlah_hadir) as total 
+           FROM kehadiran h 
+           JOIN ibadah i ON h.ibadah_id = i.id 
+           GROUP BY i.id, i.nama, i.tanggal 
+           ORDER BY total DESC 
+           LIMIT 1`
+        ),
+        pool.query(
+          `SELECT k.id, k.nama, SUM(h.jumlah_hadir) as total 
+           FROM kehadiran h 
+           JOIN klasifikasi k ON h.klasifikasi_id = k.id 
+           GROUP BY k.id, k.nama 
+           ORDER BY total DESC 
+           LIMIT 1`
+        ),
+      ]);
 
     res.json({
-      totalJemaatMingguIni: totalMingguIniRes.rows[0].total,
-      ibadahTeramai: ibadahTeramaiRes.rows[0] || { nama: "-", total: 0 },
-      klasifikasiTeramai: klasifikasiTeramaiRes.rows[0] || {
-        nama: "-",
-        total: 0,
+      success: true,
+      data: {
+        total_jemaat_minggu_ini: totalMingguIniRes.rows[0]?.total || 0,
+        ibadah_teramai: ibadahTeramaiRes.rows[0] || null,
+        klasifikasi_teramai: klasifikasiTeramaiRes.rows[0] || null,
       },
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
+    console.error("Error getDashboardSummary:", err.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "SERVER_ERROR",
+        message: "Gagal mengambil ringkasan dashboard",
+      },
+    });
   }
 };
 
@@ -96,9 +167,20 @@ exports.getAllKlasifikasi = async (req, res) => {
     const result = await pool.query(
       "SELECT id, nama FROM klasifikasi ORDER BY nama ASC"
     );
-    res.json(result.rows);
+
+    res.json({
+      success: true,
+      data: result.rows,
+      total: result.rowCount,
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
+    console.error("Error getAllKlasifikasi:", err.message);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: "SERVER_ERROR",
+        message: "Gagal mengambil data klasifikasi",
+      },
+    });
   }
 };

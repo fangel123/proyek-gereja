@@ -1,28 +1,32 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
+import api from "../api/api";
+import { motion } from "framer-motion";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiSave,
+  FiX,
+  FiPlus,
+  FiArrowLeft,
+} from "react-icons/fi";
 
 const KlasifikasiPage = () => {
   const [klasifikasiList, setKlasifikasiList] = useState([]);
   const [nama, setNama] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editNama, setEditNama] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchKlasifikasi = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/klasifikasi`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await api.get("/api/klasifikasi");
       setKlasifikasiList(res.data);
       setLoading(false);
     } catch (err) {
-      setError("Gagal memuat data.");
+      setError("Gagal memuat data klasifikasi.");
       setLoading(false);
     }
   };
@@ -34,114 +38,243 @@ const KlasifikasiPage = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/klasifikasi`,
-        { nama },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await api.post("/api/klasifikasi", { nama });
       setNama("");
+      setSuccess("Klasifikasi berhasil ditambahkan!");
+      setError("");
+      setTimeout(() => setSuccess(""), 3000);
       fetchKlasifikasi();
     } catch (err) {
-      setError(err.response.data.message || "Gagal menambah data.");
+      setError(err.response?.data?.message || "Gagal menambah klasifikasi.");
+      setSuccess("");
     }
   };
 
-  if (loading) return <div className="text-center p-10">Loading...</div>;
+  const handleEdit = (klasifikasi) => {
+    setEditingId(klasifikasi.id);
+    setEditNama(klasifikasi.nama);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditNama("");
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      await api.put(`/api/klasifikasi/${id}`, { nama: editNama });
+      setEditingId(null);
+      setSuccess("Klasifikasi berhasil diperbarui!");
+      setError("");
+      setTimeout(() => setSuccess(""), 3000);
+      fetchKlasifikasi();
+    } catch (err) {
+      setError(err.response?.data?.message || "Gagal memperbarui klasifikasi.");
+      setSuccess("");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus klasifikasi ini?")) {
+      try {
+        await api.delete(`/api/klasifikasi/${id}`);
+        setSuccess("Klasifikasi berhasil dihapus!");
+        setError("");
+        setTimeout(() => setSuccess(""), 3000);
+        fetchKlasifikasi();
+      } catch (err) {
+        setError(err.response?.data?.message || "Gagal menghapus klasifikasi.");
+        setSuccess("");
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link
-          to="/dashboard"
-          className="text-sm font-medium text-blue-600 hover:text-blue-500"
-        >
-          ← Kembali ke Dashboard
-        </Link>
-        <h1 className="text-3xl font-bold text-gray-900 mt-1">
-          Manajemen Klasifikasi Jemaat
-        </h1>
-      </div>
-
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h3 className="text-lg font-medium leading-6 text-gray-900">
-          Tambah Klasifikasi Baru
-        </h3>
-        <form
-          onSubmit={onSubmit}
-          className="mt-4 flex flex-col sm:flex-row items-stretch gap-4"
-        >
-          <div className="flex-grow">
-            <label htmlFor="nama_klasifikasi" className="sr-only">
-              Nama Klasifikasi
-            </label>
-            <input
-              id="nama_klasifikasi"
-              type="text"
-              placeholder="cth: Pemuda Wanita"
-              value={nama}
-              onChange={(e) => setNama(e.target.value)}
-              required
-              className="w-full h-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-6 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700 shadow-sm"
+    <div className="min-h-screen bg-gray-50 p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-6xl mx-auto"
+      >
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center px-4 py-2 bg-white rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
-            Tambah
-          </button>
-        </form>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
-      </div>
-
-      <div className="bg-white shadow-md rounded-lg">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nama Klasifikasi
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {klasifikasiList.map((item) => (
-                <tr key={item.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {item.nama}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      className="text-indigo-600 hover:text-indigo-900 disabled:text-gray-300"
-                      disabled
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="ml-4 text-red-600 hover:text-red-900 disabled:text-gray-300"
-                      disabled
-                    >
-                      Hapus
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <FiArrowLeft className="mr-2" />
+            Kembali ke Dashboard
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Manajemen Klasifikasi Jemaat
+          </h1>
+          <div className="w-32"></div>
         </div>
-      </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-xl shadow-md p-6 mb-8"
+        >
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Tambah Klasifikasi Baru
+          </h2>
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="nama_klasifikasi"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Nama Klasifikasi
+              </label>
+              <input
+                id="nama_klasifikasi"
+                type="text"
+                placeholder="Contoh: Pemuda Wanita"
+                value={nama}
+                onChange={(e) => setNama(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+              />
+            </div>
+            <div className="flex justify-end">
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <FiPlus className="mr-2" />
+                Tambah Klasifikasi
+              </motion.button>
+            </div>
+          </form>
+        </motion.div>
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200"
+          >
+            {error}
+          </motion.div>
+        )}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mb-6 p-4 bg-green-50 text-green-700 rounded-lg border border-green-200"
+          >
+            {success}
+          </motion.div>
+        )}
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-xl shadow-md overflow-hidden"
+        >
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ID
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nama Klasifikasi
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Aksi
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {klasifikasiList.length > 0 ? (
+                  klasifikasiList.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {editingId === item.id ? (
+                          <input
+                            type="text"
+                            value={editNama}
+                            onChange={(e) => setEditNama(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            autoFocus
+                          />
+                        ) : (
+                          <span className="text-sm font-medium text-gray-900">
+                            {item.nama}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium space-x-3">
+                        {editingId === item.id ? (
+                          <>
+                            <button
+                              onClick={() => handleUpdate(item.id)}
+                              className="text-green-600 hover:text-green-800 inline-flex items-center"
+                            >
+                              <FiSave className="mr-1" /> Simpan
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="text-gray-600 hover:text-gray-800 inline-flex items-center"
+                            >
+                              <FiX className="mr-1" /> Batal
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleEdit(item)}
+                              className="text-blue-600 hover:text-blue-800 inline-flex items-center"
+                            >
+                              <FiEdit2 className="mr-1" /> Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id)}
+                              className="text-red-600 hover:text-red-800 inline-flex items-center"
+                            >
+                              <FiTrash2 className="mr-1" /> Hapus
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="3"
+                      className="px-6 py-4 text-center text-sm text-gray-500"
+                    >
+                      Tidak ada data klasifikasi
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
