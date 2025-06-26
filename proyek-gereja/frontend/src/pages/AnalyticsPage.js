@@ -113,7 +113,6 @@ const AnalyticsPage = () => {
   }, []);
 
   useEffect(() => {
-    // Hanya fetch data jika filter sudah diterapkan atau saat pertama kali load
     if (filterApplied || (!startDate && !endDate && !selectedKlasifikasi)) {
       fetchAnalytics();
     }

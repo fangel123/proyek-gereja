@@ -25,7 +25,7 @@ const LoginPage = () => {
 
     try {
       const res = await api.post("/api/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", res.data.data.token);
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login gagal");

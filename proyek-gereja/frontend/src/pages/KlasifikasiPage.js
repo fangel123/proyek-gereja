@@ -23,7 +23,7 @@ const KlasifikasiPage = () => {
   const fetchKlasifikasi = async () => {
     try {
       const res = await api.get("/api/klasifikasi");
-      setKlasifikasiList(res.data);
+      setKlasifikasiList(res.data.data);
       setLoading(false);
     } catch (err) {
       setError("Gagal memuat data klasifikasi.");

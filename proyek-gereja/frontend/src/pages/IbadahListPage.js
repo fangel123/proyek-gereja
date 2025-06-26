@@ -28,7 +28,7 @@ const IbadahListPage = () => {
     try {
       setLoading(true);
       const res = await api.get("/api/ibadah");
-      setIbadahList(res.data);
+      setIbadahList(res.data.data);
     } catch (err) {
       setError("Gagal memuat daftar ibadah.");
     } finally {

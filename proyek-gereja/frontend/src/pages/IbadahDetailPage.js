@@ -121,21 +121,26 @@ const IbadahDetailPage = () => {
     try {
       setState((prev) => ({ ...prev, loading: true, error: "" }));
       const res = await api.get(`/api/ibadah/${id}`);
+      const ibadahData = res.data.data;
+      if (ibadahData) {
+        setState((prev) => ({
+          ...prev,
+          ibadah: ibadahData,
+          kehadiran: ibadahData.kehadiran || [],
+          loading: false,
+        }));
 
-      setState((prev) => ({
-        ...prev,
-        ibadah: res.data,
-        kehadiran: res.data.kehadiran,
-        loading: false,
-      }));
-
-      setAgendaForm((prev) => ({
-        ...prev,
-        nama_agenda: "",
-        penanggung_jawab: "",
-        urutan: res.data.agenda.length + 1,
-      }));
+        setAgendaForm((prev) => ({
+          ...prev,
+          nama_agenda: "",
+          penanggung_jawab: "",
+          urutan: (ibadahData.agenda?.length || 0) + 1,
+        }));
+      } else {
+        throw new Error("Struktur data respons tidak valid");
+      }
     } catch (err) {
+      console.error("Fetch Data Error:", err);
       setState((prev) => ({
         ...prev,
         error: "Gagal memuat detail ibadah.",

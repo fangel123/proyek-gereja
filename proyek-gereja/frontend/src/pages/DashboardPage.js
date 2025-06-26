@@ -24,7 +24,7 @@ const DashboardPage = () => {
     const fetchSummary = async () => {
       try {
         const res = await api.get("/api/analytics/dashboard");
-        setSummary(res.data);
+        setSummary(res.data.data);
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -39,13 +39,15 @@ const DashboardPage = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="text-center p-10">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <p className="mt-4 text-gray-600">Memuat dashboard...</p>
+        </div>
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,7 +88,7 @@ const DashboardPage = () => {
                         Total Jemaat Minggu Ini
                       </h3>
                       <p className="mt-1 text-3xl font-bold text-gray-900">
-                        {summary.totalJemaatMingguIni}
+                        {summary.total_jemaat_minggu_ini || 0}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         +2.5% dari minggu lalu
@@ -113,10 +115,10 @@ const DashboardPage = () => {
                         Ibadah Teramai (All-Time)
                       </h3>
                       <p className="mt-1 text-xl font-bold text-gray-900 truncate">
-                        {summary.ibadahTeramai.nama}
+                        {summary.ibadah_teramai?.nama || "Data Kosong"}
                       </p>
                       <p className="text-2xl font-semibold text-green-600">
-                        {summary.ibadahTeramai.nama}
+                        {summary.ibadah_teramai?.total || 0}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">Jemaat</p>
                     </div>
@@ -141,10 +143,10 @@ const DashboardPage = () => {
                         Klasifikasi Teraktif
                       </h3>
                       <p className="mt-1 text-xl font-bold text-gray-900">
-                        {summary.klasifikasiTeramai.nama}
+                        {summary.klasifikasi_teramai?.nama || "Data Kosong"}
                       </p>
                       <p className="text-2xl font-semibold text-purple-600">
-                        {summary.klasifikasiTeramai.total}
+                        {summary.klasifikasi_teramai?.total || 0}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">Partisipasi</p>
                     </div>
