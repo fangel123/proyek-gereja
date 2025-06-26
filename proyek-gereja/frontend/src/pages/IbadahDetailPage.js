@@ -84,7 +84,6 @@ const EditAgendaRow = React.memo(({ agenda, onSave, onCancel }) => {
             <FiX className="mr-1" /> Batal
           </motion.button>
         </div>
-        {/* Mobile PJ input */}
         <div className="md:hidden mt-2">
           <input
             type="text"
@@ -368,7 +367,6 @@ const IbadahDetailPage = () => {
       className="min-h-screen bg-gray-50 p-4 sm:p-6"
     >
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Section */}
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -407,7 +405,6 @@ const IbadahDetailPage = () => {
           </div>
         </div>
 
-        {/* Status Messages */}
         {state.error && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -463,9 +460,7 @@ const IbadahDetailPage = () => {
           </motion.div>
         )}
 
-        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Agenda */}
           <div className="lg:col-span-2 space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -568,7 +563,6 @@ const IbadahDetailPage = () => {
                 </table>
               </div>
 
-              {/* Add Agenda Form */}
               <div className="p-6 border-t border-gray-200">
                 <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
                   <FiPlus className="mr-2 text-blue-500" />
@@ -643,7 +637,6 @@ const IbadahDetailPage = () => {
             </motion.div>
           </div>
 
-          {/* Right Column - Attendance */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -116,7 +116,7 @@ const DashboardPage = () => {
                         {summary.ibadahTeramai.nama}
                       </p>
                       <p className="text-2xl font-semibold text-green-600">
-                        {summary.ibadahTeramai.total}
+                        {summary.ibadahTeramai.nama}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">Jemaat</p>
                     </div>
